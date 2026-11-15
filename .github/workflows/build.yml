@@ -1,0 +1,21 @@
+name: Build mod
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build
+        run: |
+          unzip -q dystopianwars-mod-forge-1.20.1.zip
+          cd dystopianwars-mod
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dystopianwars-mod
+          path: dystopianwars-mod/build/libs/*.jar
