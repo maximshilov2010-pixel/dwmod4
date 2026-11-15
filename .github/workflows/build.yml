@@ -1,5 +1,7 @@
 name: Build mod
-on: [push, workflow_dispatch]
+on:
+  push:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,13 +11,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Unpack project zip
+        run: |
+          ls -la
+          mkdir -p ../proj
+          unzip -q -o ./*.zip -d ../proj
+          find ../proj -maxdepth 2 -name gradlew
       - name: Build
         run: |
-          unzip -q dystopianwars-mod-forge-1.20.1.zip
-          cd dystopianwars-mod
+          cd "$(dirname "$(find ../proj -maxdepth 2 -name gradlew | head -1)")"
           chmod +x gradlew
-          ./gradlew build --no-daemon
+          ./gradlew build --no-daemon --stacktrace
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp build/libs/*.jar "$GITHUB_WORKSPACE/out/"
       - uses: actions/upload-artifact@v4
         with:
           name: dystopianwars-mod
-          path: dystopianwars-mod/build/libs/*.jar
+          path: out/*.jar
